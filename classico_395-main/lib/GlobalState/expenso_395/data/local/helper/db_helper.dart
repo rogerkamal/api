@@ -94,6 +94,19 @@ class DBHelper {
     );
   }
 
+
+  /// just for testing
+  Future<dynamic> fetchUser({required String userId}) async {
+    var db = await initDB();
+    List<Map<String, dynamic>> allUsers = await db.query(
+      TABLE_USER,
+      where: "$COLUMN_USER_ID = ?",
+      whereArgs: [userId],
+    );
+
+    print("UserTable : $allUsers");
+  }
+
   ///events
   ///auth
   Future<int> loginUser({required String email, required String pass}) async {
@@ -104,6 +117,7 @@ class DBHelper {
       where: "$COLUMN_USER_EMAIL = ?",
       whereArgs: [email],
     );
+
 
     if(allUsers.isNotEmpty){
 

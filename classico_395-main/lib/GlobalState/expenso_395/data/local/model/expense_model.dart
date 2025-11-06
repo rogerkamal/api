@@ -23,7 +23,7 @@ class ExpenseModel{
     required this.expenseType,
   });
 
-  factory ExpenseModel.fromMap(Map<String,dynamic>map){
+  factory ExpenseModel.fromMap(Map<String,dynamic> map){
     return ExpenseModel(
       eid: map[DBHelper.COLUMN_EXPENSE_ID],
       uid: map[DBHelper.COLUMN_USER_ID],

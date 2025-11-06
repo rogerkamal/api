@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:classico_395/GlobalState/expenso_395/app_constants.dart';
+import 'package:classico_395/GlobalState/expenso_395/data/local/helper/db_helper.dart';
 // import 'package:expenso_395/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,17 +20,18 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration (seconds: 3), () async{
 
+    Timer(Duration(seconds: 3), () async {
       String nextPageName = AppRoutes.login;
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String userId = prefs.getString(AppConstants.prefUserIdKey) ?? "";
 
-      if(userId.isNotEmpty){
+      print("user id : $userId");
+
+      if (userId.isNotEmpty) {
         nextPageName = AppRoutes.dashboard;
       }
-
 
       Navigator.pushReplacementNamed(context, nextPageName);
     });
@@ -47,10 +49,16 @@ class _SplashPageState extends State<SplashPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset("assets/app_image/logo.png"),
-                SizedBox(width: 15,),
-                Text('Monety',style: TextStyle(
-                  color: Colors.black,fontSize: 30,fontWeight: FontWeight.bold
-                ),)
+                SizedBox(
+                  width: 15,
+                ),
+                Text(
+                  'Monety',
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold),
+                )
               ],
             ),
           ],

@@ -1,0 +1,293 @@
+import 'package:classico_395/db_exp_395/db_helper.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
+
+class HomePageDB extends StatefulWidget {
+  const HomePageDB({super.key});
+
+  @override
+  State<HomePageDB> createState() => _HomePageDBState();
+}
+
+class _HomePageDBState extends State<HomePageDB> {
+  DbHelper? dbHelper;
+  List<Map<String, dynamic>> allNotes = [];
+  DateFormat df = DateFormat.yMMMEd();
+  TextEditingController titleController = TextEditingController();
+  TextEditingController descController = TextEditingController();
+  int isChecked = 0;
+  MediaQueryData? mqData;
+
+  @override
+  void initState() {
+    super.initState();
+
+    ///DbHelper dbHelper = DbHelper();
+    dbHelper = DbHelper.getInstance();
+    getAllNotes();
+  }
+
+  void getAllNotes() async {
+    allNotes = await dbHelper!.fetchAllNotes();
+    setState(() {});
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    mqData = MediaQuery.of(context);
+
+    return ScreenUtilInit(
+      designSize: Size(mqData!.size.width, mqData!.size.height),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp(
+          home: child,
+        );
+
+      },
+      child: Scaffold(
+        appBar: AppBar(title: Text('Home')),
+        body: /*Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Checkbox(value: isChecked==1, onChanged: (value){
+            isChecked = value! ? 1 : 0;
+            setState(() {});
+          }, activeColor: Colors.amber,),
+          CheckboxListTile(
+            controlAffinity: ListTileControlAffinity.leading,
+            value: isChecked==1, onChanged: (value){
+            isChecked = value! ? 1 : 0;
+            setState(() {});
+          },
+            title: Text('CheckboxListTile'),
+            subtitle: Text('CheckboxListTile subtitle'),
+          ),
+        ],
+      ),*/
+
+
+        Column(
+          children: [
+            SearchBar(
+              padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16)),
+              leading: Icon(Icons.search),
+              onChanged: (value) async{
+                Future.delayed(Duration(seconds: 2));
+                allNotes = await dbHelper!.fetchAllNotes(query : value);
+                setState(() {});
+              },
+            ),
+            SizedBox(
+              height: 16,
+            ),
+            Expanded(
+              child: allNotes.isNotEmpty
+                  ? ListView.builder(
+                itemCount: allNotes.length,
+                itemBuilder: (_, index) {
+                  return Card(
+                    child: ListTile(
+                      leading: Text("${index + 1}"),
+                      title: Text(allNotes[index][DbHelper.COLUMN_NOTE_TITLE]),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(allNotes[index][DbHelper.COLUMN_NOTE_DESC]),
+                          Text(
+                            df.format(
+                              DateTime.fromMillisecondsSinceEpoch(
+                                int.parse(
+                                  allNotes[index][DbHelper
+                                      .COLUMN_NOTE_CREATED_AT],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () async {
+                              titleController.text = allNotes[index][DbHelper.COLUMN_NOTE_TITLE];
+                              descController.text = allNotes[index][DbHelper.COLUMN_NOTE_DESC];
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) => bottomSheetUI(
+                                  isUpdate: true,
+                                  id: allNotes[index][DbHelper.COLUMN_NOTE_ID],
+                                ),
+                              );
+                            },
+                            icon: Icon(Icons.edit),
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (_) {
+                                  return Container(
+                                    padding: EdgeInsets.all(11),
+                                    height: 140,
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          "Are you sure want to DELETE?",
+                                          style: TextStyle(
+                                            fontSize: 21,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(width: 11),
+
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.end,
+                                          children: [
+                                            OutlinedButton(
+                                              onPressed: () async {
+                                                bool isDeleted = await dbHelper!
+                                                    .deleteNote(
+                                                  id:
+                                                  allNotes[index][DbHelper
+                                                      .COLUMN_NOTE_ID],
+                                                );
+                                                if (isDeleted) {
+                                                  getAllNotes();
+                                                }
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text('Yes'),
+                                            ),
+                                            SizedBox(width: 11),
+                                            OutlinedButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text('No'),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            icon: Icon(Icons.delete, color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              )
+                  : Center(child: Text("No Notes yet!!")),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            titleController.clear();
+            descController.text = "";
+            showModalBottomSheet(
+              //isDismissible: false,
+              //enableDrag: false,
+              context: context,
+              builder: (_) => bottomSheetUI(),
+            );
+          },
+          child: Icon(Icons.add),
+        ),
+      ),
+    );
+  }
+
+  Widget bottomSheetUI({bool isUpdate = false, int id = 0}) {
+    return Container(
+      padding: EdgeInsets.all(11),
+      child: Center(
+        child: Column(
+          children: [
+            Text(
+              isUpdate ? 'Update Note' : 'Add Note',
+              style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 21),
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                labelText: 'Title',
+                hintText: 'Enter Note Title',
+              ),
+            ),
+            SizedBox(height: 11),
+            TextField(
+              minLines: 4,
+              maxLines: 4,
+              controller: descController,
+              decoration: InputDecoration(
+                alignLabelWithHint: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                labelText: 'Desc',
+                hintText: 'Enter Note Desc',
+              ),
+            ),
+            SizedBox(height: 11),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                OutlinedButton(
+                  onPressed: () async {
+                    bool check = false;
+
+                    if(titleController.text.isNotEmpty && descController.text.isNotEmpty) {
+                      if (isUpdate) {
+                        check = await dbHelper!.updateNote(
+                          title: titleController.text,
+                          desc: descController.text,
+                          id: id,
+                        );
+                      } else {
+                        check = await dbHelper!.addNote(
+                          title: titleController.text,
+                          desc: descController.text,
+                        );
+                      }
+
+                      if (check) {
+                        getAllNotes();
+                        Navigator.pop(context);
+                      }
+                    } else {
+
+                    }
+                  },
+                  child: Text('Save'),
+                ),
+                SizedBox(width: 11),
+                OutlinedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+}

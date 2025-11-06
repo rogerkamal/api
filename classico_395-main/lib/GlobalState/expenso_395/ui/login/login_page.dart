@@ -194,10 +194,11 @@ class _LoginPageState extends State<LoginPage> {
                       child: isLoading ? Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          /// true ? Widget1 : Widget2
                           CircularProgressIndicator(color: Colors.white,),
                           SizedBox(width: 10,),
                           Text(
-                            'Logging in...',
+                            'Logging in...$isLoading',
                             style: TextStyle(
                               fontSize: 22,
                               color: Colors.white,

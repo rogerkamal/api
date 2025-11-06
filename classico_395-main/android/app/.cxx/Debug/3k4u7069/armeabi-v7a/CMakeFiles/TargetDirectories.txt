@@ -1,0 +1,2 @@
+D:/WScubeTech/classico_395-main/classico_395-main/android/app/.cxx/Debug/3k4u7069/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/WScubeTech/classico_395-main/classico_395-main/android/app/.cxx/Debug/3k4u7069/armeabi-v7a/CMakeFiles/rebuild_cache.dir

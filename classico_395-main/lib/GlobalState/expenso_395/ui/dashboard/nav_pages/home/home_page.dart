@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:classico_395/GlobalState/expenso_395/app_constants.dart' show AppConstants;
+import 'package:classico_395/GlobalState/expenso_395/data/local/helper/db_helper.dart';
 import 'package:classico_395/GlobalState/expenso_395/data/local/model/expense_model.dart';
 import 'package:classico_395/GlobalState/expenso_395/data/local/model/filter_expense_model.dart';
 import 'package:classico_395/GlobalState/expenso_395/ui/dashboard/nav_pages/bloc/expense_bloc.dart';
@@ -7,6 +8,7 @@ import 'package:classico_395/GlobalState/expenso_395/ui/dashboard/nav_pages/bloc
 import 'package:classico_395/GlobalState/expenso_395/ui/dashboard/nav_pages/bloc/expense_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -48,6 +50,7 @@ class _HomePageState extends State<HomePage> {
       "color": Colors.redAccent.withOpacity(.2),
     },
   ];
+  DBHelper? dbHelper;
 
   MediaQueryData? mqData;
 
@@ -55,7 +58,18 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     context.read<ExpenseBloc>().add(FetchAllExpenseEvent());
+
+    getUserData();
+
   }
+
+  void getUserData() async {
+    dbHelper = DBHelper.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String userId = prefs.getString(AppConstants.prefUserIdKey) ?? "";
+    dbHelper!.fetchUser(userId: userId);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -977,3 +991,5 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+
